@@ -62,8 +62,8 @@ asmlinkage long hook_aarch64_execve(const struct pt_regs *regs)
 	void ***argv = (void ***)&regs->regs[1];
 	void ***envp = (void ***)&regs->regs[2];
 
-	ksu_handle_execve(filename, argv, envp);
-	return __arm64_sys_execve(regs);
+	ksu_handle_execve_sucompat(NULL, filename, argv, envp, NULL);
+	return aarch64_execve(regs);
 }
 
 extern long __arm64_sys_execveat(const struct pt_regs *regs);
@@ -144,8 +144,8 @@ asmlinkage long hook_armeabi_execve(const struct pt_regs *regs)
 	void ***argv = (void ***)&regs->regs[1];
 	void ***envp = (void ***)&regs->regs[2];
 
-	ksu_handle_execve(filename, argv, envp);
-	return __arm64_compat_sys_execve(regs);
+	ksu_handle_execve_sucompat(NULL, filename, argv, envp, NULL);
+	return armeabi_execve(regs);
 }
 
 extern long __arm64_compat_sys_execveat(const struct pt_regs *regs);
@@ -217,7 +217,7 @@ asmlinkage long hook_aarch64_reboot(int magic1, int magic2, unsigned int cmd, vo
 static void *aarch64_execve __read_mostly = NULL;
 asmlinkage long hook_aarch64_execve(const char __user * filename, const char __user *const __user * argv, const char __user *const __user * envp)
 {
-	ksu_handle_execve(&filename, (void ***)&argv, (void ***)&envp);
+	ksu_handle_execve_sucompat(NULL, &filename, (void ***)&argv, (void ***)&envp, NULL);
 	return sys_execve(filename, argv, envp);
 }
 
@@ -227,7 +227,7 @@ __weak long sys_execveat(int fd, const char __user * filename, const char __user
 static void *aarch64_execveat __read_mostly = NULL;
 asmlinkage long hook_aarch64_execveat(int fd, const char __user * filename, const char __user *const __user * argv, const char __user *const __user * envp, int flags)
 {
-	ksu_handle_execve(&filename, (void ***)&argv, (void ***)&envp);
+	ksu_handle_execve_sucompat(NULL, &filename, (void ***)&argv, (void ***)&envp, NULL);
 	return sys_execveat(fd, filename, argv, envp, flags);
 }
 
@@ -276,7 +276,7 @@ asmlinkage long hook_armeabi_execve(const char __user * filename,
 				const compat_uptr_t __user * argv,
 				const compat_uptr_t __user * envp)
 {
-	ksu_handle_execve(&filename, (void ***)&argv, (void ***)&envp);
+	ksu_handle_execve_sucompat(NULL, &filename, (void ***)&argv, (void ***)&envp, NULL);
 	return compat_sys_execve(filename, argv, envp);
 }
 
@@ -286,7 +286,7 @@ __weak long compat_sys_execveat(int fd, const char __user * filename, const comp
 static void *armeabi_execveat __read_mostly = NULL;
 asmlinkage long hook_armeabi_execveat(int fd, const char __user * filename, const compat_uptr_t __user * argv, const compat_uptr_t __user * envp, int flags)
 {
-	ksu_handle_execve(&filename, (void ***)&argv, (void ***)&envp);
+	ksu_handle_execve_sucompat(NULL, &filename, (void ***)&argv, (void ***)&envp, NULL);
 	return compat_sys_execveat(fd, filename, argv, envp, flags);
 }
 
